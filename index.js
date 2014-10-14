@@ -1,13 +1,16 @@
-var featureCollection = require('featureCollection');
+var featureCollection = require('turf-featurecollection');
 var centroid = require('turf-centroid');
 var distance = require('turf-distance');
+var intersect = require('turf-intersect');
+var point = require('turf-point');
+var linestring = require('turf-linestring');
 
 module.exports = function(fc) {
   // normalize
   if(fc.type != 'FeatureCollection') {
     if(fc.type != 'Feature') {
       fc = {
-        type: 'Feature'
+        type: 'Feature',
         geometry: fc
       };
     }
@@ -15,20 +18,52 @@ module.exports = function(fc) {
   }
 
   //get centroid
+  var cent = centroid(fc);
 
   //if centroid intersects the featurecollection, return it
+  var intersection = intersect(fc, cent);
+  if(intersection.type != 'GeometryCollection') {
+    return cent;
+  }
 
   //else get all points in the fc and all lines in the collection
+  var points = [];
+  var segments = [];
+  fc.features.forEach(function (f) {
+    if (f.geometry.type === 'Point') {
+      points.push(f);
+    } else if (f.geometry.type === 'MultiPoint') {
+      f.geometry.coordinates.forEach(function (coord) {
+        points.push(point(coord));
+      });
+    } else {
+
+    }
+  })
 
   //for all points, get the distance using turf-distance
+  var minDistance = Infinity;
+  var currentMin;
+  points.forEach(function (pt) {
+    var dist = distance(pt, cent, 'miles')
+    if(dist < minDistance) {
+      minDistance = dist;
+      currentMin = pt;
+    }
+  });
 
   //for all line segments, use the distToSegment function
+  segments.forEach(function (segment) {
+    var dist = distToSegment(cent, segment[0], segment[1]);
+    if(dist < minDistance) {
+      minDistance = dist;
+      currentMin = pt;
+    }
+  });
 
   //return the point with the shortest distance
-
   var distances
 }
-
 
 // modified from http://stackoverflow.com/a/1501725
 function distToSegmentSquared(p, v, w) {
@@ -37,8 +72,9 @@ function distToSegmentSquared(p, v, w) {
   var t = ((p[0] - v[0]) * (w[0] - v[0]) + (p[1] - v[1]) * (w[1] - v[1])) / l2;
   if (t < 0) return dist2(p, v);
   if (t > 1) return dist2(p, w);
-  return dist2(p, { x: v[0] + t * (w[0] - v[0]),
-                    y: v[1] + t * (w[1] - v[1]) });
+  var x = v[0] + t * (w[0] - v[0]);
+  var y = v[1] + t * (w[1] - v[1]);
+  return dist2(p, [x, y]);
 }
 function distToSegment(p, v, w) { 
   return Math.sqrt(distToSegmentSquared(p, v, w)); 

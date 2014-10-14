@@ -26,5 +26,13 @@
   "homepage": "https://github.com/Turfjs/turf-point-on-surface",
   "devDependencies": {
     "tape": "^3.0.0"
+  },
+  "dependencies": {
+    "turf-centroid": "^0.1.2",
+    "turf-distance": "^0.1.5",
+    "turf-featurecollection": "^0.1.0",
+    "turf-intersect": "0.0.0",
+    "turf-linestring": "^0.1.1",
+    "turf-point": "^0.1.6"
   }
 }
