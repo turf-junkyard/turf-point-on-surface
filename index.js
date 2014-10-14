@@ -36,8 +36,38 @@ module.exports = function(fc) {
       f.geometry.coordinates.forEach(function (coord) {
         points.push(point(coord));
       });
-    } else {
-
+    } else if (f.geometry.type === 'LineString')  { 
+      f.geometry.coordinates.forEach(function (coord, i) {
+        if(i < f.geometry.coordinates.length) {
+          segments.push([linestring(coord, f.geometry.coordinates[i + 1]));
+        }
+      });
+    } else if (f.geometry.type === 'MultiLineString')  { 
+      f.geometry.coordinates.forEach(function (line) {
+        line.forEach(function (coord, i) {
+          if(i < f.geometry.coordinates.length) {
+            segments.push([linestring(coord, line[i + 1]));
+          }
+        });
+      });
+    } else if (f.geometry.type === 'Polygon')  { 
+      f.geometry.coordinates.forEach(function (ring) {
+        ring.forEach(function (coord, i) {
+          if(i < f.geometry.coordinates.length) {
+            segments.push([linestring(coord, ring[i + 1]));
+          }
+        });
+      });
+    } else if (f.geometry.type === 'MultiPolygon')  { 
+      f.geometry.coordinates.forEach(function (poly) {
+        poly.forEach(function (ring) {
+          ring.forEach(function (coord, i) {
+            if(i < f.geometry.coordinates.length) {
+              segments.push([linestring(coord, ring[i + 1]));
+            }
+          });
+        });
+      });
     }
   })
 
