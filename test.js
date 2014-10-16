@@ -3,7 +3,7 @@ var centroid = require('./');
 var fs = require('fs');
 
 test('point-on-surface', function(t) {
-  var fc = fs.readFileSync(__dirname + '/fixtures/multipolygon.geojson');
+  var fc = JSON.parse(fs.readFileSync(__dirname + '/fixtures/multipolygon.geojson'));
   var cent = centroid(fc);
   t.ok(cent, 'centroid returned');
   t.equal(cent.type, 'Feature');

@@ -1,9 +1,7 @@
 var featureCollection = require('turf-featurecollection');
-var centroid = require('turf-centroid');
+var centroid = require('turf-center');
 var distance = require('turf-distance');
-var intersect = require('turf-intersect');
-var point = require('turf-point');
-var linestring = require('turf-linestring');
+var inside = require('turf-inside');
 
 module.exports = function(fc) {
   // normalize
@@ -20,96 +18,93 @@ module.exports = function(fc) {
   //get centroid
   var cent = centroid(fc);
 
-  //if centroid intersects the featurecollection, return it
-  var intersection = intersect(fc, cent);
-  if(intersection.type != 'GeometryCollection') {
-    return cent;
-  }
-
-  //else get all points in the fc and all lines in the collection
-  var points = [];
-  var segments = [];
-  fc.features.forEach(function (f) {
-    if (f.geometry.type === 'Point') {
-      points.push(f);
-    } else if (f.geometry.type === 'MultiPoint') {
-      f.geometry.coordinates.forEach(function (coord) {
-        points.push(point(coord));
-      });
-    } else if (f.geometry.type === 'LineString')  { 
-      f.geometry.coordinates.forEach(function (coord, i) {
-        if(i < f.geometry.coordinates.length) {
-          segments.push([linestring(coord, f.geometry.coordinates[i + 1]));
+  // check to see if centroid is on surface
+  var onSurface = false;
+  var i = 0;
+  while(!onSurface && i < fc.features.length) {
+    var geom = f.geometry.type;
+    if (geom.type === 'Point') {
+      if (cent.geometry.coordinates[0] === geom.coordinates[0] &&
+        cent.geometry.coordinates[1] === geom.coordinates[1]) {
+        onSurface = true;
+      }
+    } else if(geom.type === 'MultiPoint') {
+      var onMultiPoint = false;
+      var k = 0;
+      while(!onMultiPoint && k < geom.coordinates.length) {
+        if (cent.geometry.coordinates[0] === geom.coordinates[k][0] &&
+          cent.geometry.coordinates[1] === geom.coordinates[k][1]) {
+          onSurface = true;
+          onMultiPoint = true;
         }
-      });
-    } else if (f.geometry.type === 'MultiLineString')  { 
-      f.geometry.coordinates.forEach(function (line) {
-        line.forEach(function (coord, i) {
-          if(i < f.geometry.coordinates.length) {
-            segments.push([linestring(coord, line[i + 1]));
+        k++;
+      }
+    } else if(geom.type === 'LineString') {
+      var onLine = false;
+      var k = 0;
+      while(!onLine && k < geom.coordinates.length - 1) {
+        var x = cent.coordinates[0];
+        var y = cent.coordinates[1];
+        var x1 = geom.coordinates[k][0];
+        var y1 = geom.coordinates[k][1];
+        var x2 = geom.coordinates[k+1][0];
+        var y2 = geom.coordinates[k+1][1];
+        if(pointOnSegment(x, y, x1, y1, x2, y2)) {
+          onLine = true;
+          onSurface = true;
+        }
+        k++;
+      }
+    } else if(geom.type === 'MultiLineString') {
+      var onMultiLine = false;
+      var j = 0;
+      while(!onMultiLine && j < geom.coordinates.length) {
+        var onLine = false;
+        var k = 0;
+        var line = geom.coordinates[j];
+        while(!onLine && k < line.length - 1) {
+          var x = cent.coordinates[0];
+          var y = cent.coordinates[1];
+          var x1 = line[k][0];
+          var y1 = line[k][1];
+          var x2 = line[k+1][0];
+          var y2 = line[k+1][1];
+          if(pointOnSegment(x, y, x1, y1, x2, y2)) {
+            onLine = true;
+            onSurface = true;
           }
-        });
-      });
-    } else if (f.geometry.type === 'Polygon')  { 
-      f.geometry.coordinates.forEach(function (ring) {
-        ring.forEach(function (coord, i) {
-          if(i < f.geometry.coordinates.length) {
-            segments.push([linestring(coord, ring[i + 1]));
-          }
-        });
-      });
-    } else if (f.geometry.type === 'MultiPolygon')  { 
-      f.geometry.coordinates.forEach(function (poly) {
-        poly.forEach(function (ring) {
-          ring.forEach(function (coord, i) {
-            if(i < f.geometry.coordinates.length) {
-              segments.push([linestring(coord, ring[i + 1]));
-            }
-          });
-        });
-      });
+          k++;
+        }
+        j++;
+      }
+    } else if(geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
+      if(inside(cent, geom)) {
+        onSurface = true;
+      }
+    } 
+    i++;
+  }
+  if(onSurface) {
+    return cent;
+  } else {
+    var vertices = explode(fc);
+    var closestVertex;
+    var closestDistance = Infinity;
+    for(var i = 0; i < vertices.features) {
+      var dist = distance(cent, vertices.features[i]);
+      if(dist < closestDistance) {
+        closestDistance = dist;
+        closestVertex = vertices.features[i];
+      }
     }
-  })
-
-  //for all points, get the distance using turf-distance
-  var minDistance = Infinity;
-  var currentMin;
-  points.forEach(function (pt) {
-    var dist = distance(pt, cent, 'miles')
-    if(dist < minDistance) {
-      minDistance = dist;
-      currentMin = pt;
-    }
-  });
-
-  //for all line segments, use the distToSegment function
-  segments.forEach(function (segment) {
-    var dist = distToSegment(cent, segment[0], segment[1]);
-    if(dist < minDistance) {
-      minDistance = dist;
-      currentMin = pt;
-    }
-  });
-
-  //return the point with the shortest distance
-  var distances
+  }
 }
 
-// modified from http://stackoverflow.com/a/1501725
-function distToSegmentSquared(p, v, w) {
-  var l2 = dist2(v, w);
-  if (l2 == 0) return dist2(p, v);
-  var t = ((p[0] - v[0]) * (w[0] - v[0]) + (p[1] - v[1]) * (w[1] - v[1])) / l2;
-  if (t < 0) return dist2(p, v);
-  if (t > 1) return dist2(p, w);
-  var x = v[0] + t * (w[0] - v[0]);
-  var y = v[1] + t * (w[1] - v[1]);
-  return dist2(p, [x, y]);
-}
-function distToSegment(p, v, w) { 
-  return Math.sqrt(distToSegmentSquared(p, v, w)); 
-}
-
-function dist2(v, w) { 
-  return Math.pow(v[0] - w[0], 2) + Math.pow(v[1] - w[1], 2);
+function pointOnSegment (x, y, x1, y1, x2, y2) {
+  var ab = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1));
+  var ap = sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1));
+  var pb = sqrt((x2-x)*(x2-x)+(y2-y)*(y2-y)+(z2-z)*(z2-z));
+  if(ab === ap + pb) {
+    return true;
+  }
 }
