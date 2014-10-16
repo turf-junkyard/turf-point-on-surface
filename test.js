@@ -8,7 +8,7 @@ test('point-on-surface', function(t) {
   t.ok(cent, 'centroid returned');
   t.equal(cent.type, 'Feature');
   t.equal(cent.geometry.type, 'Point');
-  t.equal(typeof cent.geometry.coordinated[0], 'number');
-  t.equal(typeof cent.geometry.coordinated[1], 'number');
+  t.equal(typeof cent.geometry.coordinates[0], 'number');
+  t.equal(typeof cent.geometry.coordinates[1], 'number');
   t.end();
 });

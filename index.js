@@ -2,6 +2,7 @@ var featureCollection = require('turf-featurecollection');
 var centroid = require('turf-center');
 var distance = require('turf-distance');
 var inside = require('turf-inside');
+var explode = require('turf-explode');
 
 module.exports = function(fc) {
   // normalize
@@ -22,7 +23,7 @@ module.exports = function(fc) {
   var onSurface = false;
   var i = 0;
   while(!onSurface && i < fc.features.length) {
-    var geom = f.geometry.type;
+    var geom = fc.features[i].geometry.type;
     if (geom.type === 'Point') {
       if (cent.geometry.coordinates[0] === geom.coordinates[0] &&
         cent.geometry.coordinates[1] === geom.coordinates[1]) {
@@ -90,20 +91,21 @@ module.exports = function(fc) {
     var vertices = explode(fc);
     var closestVertex;
     var closestDistance = Infinity;
-    for(var i = 0; i < vertices.features) {
-      var dist = distance(cent, vertices.features[i]);
+    for(var i = 0; i < vertices.features.length; i++) {
+      var dist = distance(cent, vertices.features[i], 'miles');
       if(dist < closestDistance) {
         closestDistance = dist;
         closestVertex = vertices.features[i];
       }
     }
+    return closestVertex;
   }
 }
 
 function pointOnSegment (x, y, x1, y1, x2, y2) {
-  var ab = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1));
-  var ap = sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1));
-  var pb = sqrt((x2-x)*(x2-x)+(y2-y)*(y2-y)+(z2-z)*(z2-z));
+  var ab = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1));
+  var ap = Math.sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1));
+  var pb = Math.sqrt((x2-x)*(x2-x)+(y2-y)*(y2-y)+(z2-z)*(z2-z));
   if(ab === ap + pb) {
     return true;
   }
