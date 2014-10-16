@@ -23,7 +23,7 @@ module.exports = function(fc) {
   var onSurface = false;
   var i = 0;
   while(!onSurface && i < fc.features.length) {
-    var geom = fc.features[i].geometry.type;
+    var geom = fc.features[i].geometry;
     if (geom.type === 'Point') {
       if (cent.geometry.coordinates[0] === geom.coordinates[0] &&
         cent.geometry.coordinates[1] === geom.coordinates[1]) {
@@ -44,8 +44,8 @@ module.exports = function(fc) {
       var onLine = false;
       var k = 0;
       while(!onLine && k < geom.coordinates.length - 1) {
-        var x = cent.coordinates[0];
-        var y = cent.coordinates[1];
+        var x = cent.geometry.coordinates[0];
+        var y = cent.geometry.coordinates[1];
         var x1 = geom.coordinates[k][0];
         var y1 = geom.coordinates[k][1];
         var x2 = geom.coordinates[k+1][0];
@@ -64,8 +64,8 @@ module.exports = function(fc) {
         var k = 0;
         var line = geom.coordinates[j];
         while(!onLine && k < line.length - 1) {
-          var x = cent.coordinates[0];
-          var y = cent.coordinates[1];
+          var x = cent.geometry.coordinates[0];
+          var y = cent.geometry.coordinates[1];
           var x1 = line[k][0];
           var y1 = line[k][1];
           var x2 = line[k+1][0];
@@ -79,7 +79,11 @@ module.exports = function(fc) {
         j++;
       }
     } else if(geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
-      if(inside(cent, geom)) {
+      var f = {
+        type: 'Feature',
+        geometry: geom
+      };
+      if(inside(cent, f)) {
         onSurface = true;
       }
     } 
@@ -88,7 +92,10 @@ module.exports = function(fc) {
   if(onSurface) {
     return cent;
   } else {
-    var vertices = explode(fc);
+    var vertices = featureCollection([]);
+    for(var i = 0; i < fc.features.length; i++) {
+      vertices.features = vertices.features.concat(explode(fc.features[i]).features);
+    }
     var closestVertex;
     var closestDistance = Infinity;
     for(var i = 0; i < vertices.features.length; i++) {
@@ -103,9 +110,9 @@ module.exports = function(fc) {
 }
 
 function pointOnSegment (x, y, x1, y1, x2, y2) {
-  var ab = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1));
-  var ap = Math.sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1)+(z-z1)*(z-z1));
-  var pb = Math.sqrt((x2-x)*(x2-x)+(y2-y)*(y2-y)+(z2-z)*(z2-z));
+  var ab = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+  var ap = Math.sqrt((x-x1)*(x-x1)+(y-y1)*(y-y1));
+  var pb = Math.sqrt((x2-x)*(x2-x)+(y2-y)*(y2-y));
   if(ab === ap + pb) {
     return true;
   }
