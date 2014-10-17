@@ -15,13 +15,12 @@ npm install turf-point-on-surface
 
 |name|description|
 |---|---|
-|x|x coordinate|
-|y|y coordinate|
+|fc|A FeatureCollection, Feature, or Geometry of any type|
 
 ###Usage
 
 ```js
-centroid(x, y)
+centroid(fc)
 ```
 
 ###Example
