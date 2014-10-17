@@ -3,8 +3,8 @@ var centroid = require('./');
 var fs = require('fs');
 var inside = require('turf-inside');
 
-test('point-on-surface -- closest vertex', function(t) {
-  var fc = JSON.parse(fs.readFileSync(__dirname + '/fixtures/multipolygon.geojson'));
+test('point-on-surface -- closest vertex on polygons', function(t) {
+  var fc = JSON.parse(fs.readFileSync(__dirname + '/fixtures/polygons.geojson'));
   var cent = centroid(fc);
 
   t.ok(cent, 'centroid returned');
@@ -82,7 +82,32 @@ test('point-on-surface -- closest vertex on multilinestring', function(t) {
   t.equal(cent.geometry.type, 'Point');
   t.equal(typeof cent.geometry.coordinates[0], 'number');
   t.equal(typeof cent.geometry.coordinates[1], 'number');
-  console.log(JSON.stringify(cent))
+  
+  t.end();
+});
+
+test('point-on-surface -- multipolygon', function(t) {
+  var fc = JSON.parse(fs.readFileSync(__dirname + '/fixtures/multipolygon.geojson'));
+  var cent = centroid(fc);
+
+  t.ok(cent, 'centroid returned');
+  t.equal(cent.type, 'Feature');
+  t.equal(cent.geometry.type, 'Point');
+  t.equal(typeof cent.geometry.coordinates[0], 'number');
+  t.equal(typeof cent.geometry.coordinates[1], 'number');
+  
+  t.end();
+});
+
+test('point-on-surface -- multipoint', function(t) {
+  var fc = JSON.parse(fs.readFileSync(__dirname + '/fixtures/multipoint.geojson'));
+  var cent = centroid(fc);
+
+  t.ok(cent, 'centroid returned');
+  t.equal(cent.type, 'Feature');
+  t.equal(cent.geometry.type, 'Point');
+  t.equal(typeof cent.geometry.coordinates[0], 'number');
+  t.equal(typeof cent.geometry.coordinates[1], 'number');
   
   t.end();
 });
