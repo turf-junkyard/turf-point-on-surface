@@ -69,6 +69,19 @@ test('point-on-surface -- closest vertex on lines', function(t) {
   t.equal(cent.geometry.type, 'Point');
   t.equal(typeof cent.geometry.coordinates[0], 'number');
   t.equal(typeof cent.geometry.coordinates[1], 'number');
+
+  t.end();
+});
+
+test('point-on-surface -- closest vertex on multilinestring', function(t) {
+  var fc = JSON.parse(fs.readFileSync(__dirname + '/fixtures/multiline.geojson'));
+  var cent = centroid(fc);
+
+  t.ok(cent, 'centroid returned');
+  t.equal(cent.type, 'Feature');
+  t.equal(cent.geometry.type, 'Point');
+  t.equal(typeof cent.geometry.coordinates[0], 'number');
+  t.equal(typeof cent.geometry.coordinates[1], 'number');
   console.log(JSON.stringify(cent))
   
   t.end();
