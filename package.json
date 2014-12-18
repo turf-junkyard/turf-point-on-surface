@@ -25,7 +25,8 @@
   },
   "homepage": "https://github.com/Turfjs/turf-point-on-surface",
   "devDependencies": {
-    "tape": "^3.0.3"
+    "tape": "^3.0.3",
+    "benchmark": "^1.0.0"
   },
   "dependencies": {
     "turf-center": "^1.0.0",
