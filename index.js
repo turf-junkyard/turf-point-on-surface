@@ -4,6 +4,14 @@ var distance = require('turf-distance');
 var inside = require('turf-inside');
 var explode = require('turf-explode');
 
+/**
+ * Finds a {@link Point} guaranteed to be on the surface of a geometry,
+ * feature, or featurecollection.
+ *
+ * @module turf/pointOnSurface
+ * @param {*} input any GeoJSON object
+ * @returns {Feature} a point on the surface
+ */
 module.exports = function(fc) {
   // normalize
   if(fc.type != 'FeatureCollection') {
