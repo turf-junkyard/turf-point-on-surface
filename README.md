@@ -2,7 +2,7 @@ turf-point-on-surface
 ===
 [![Build Status](https://travis-ci.org/Turfjs/turf-point-on-surface.svg)](https://travis-ci.org/Turfjs/turf-point-on-surface)
 
-Finds a centroid guaranteed to be on the surface of a geometry, feature, or featurecollection.
+Finds a point guaranteed to be on the surface of a GeoJSON object.
 
 
 ###Install
@@ -20,15 +20,15 @@ npm install turf-point-on-surface
 ###Usage
 
 ```js
-centroid(fc)
+pointOnSurface(fc)
 ```
 
 ###Example
 
 ```js
-var centroid = require('turf-point-on-surface');
+var pointOnSurface = require('turf-point-on-surface');
 var fs = require('fs');
 
 var fc = JSON.parse(fs.readFileSync('path/to/myFile.geojson'));
-var cent = centroid(fc);
+var cent = pointOnSurface(fc);
 ```

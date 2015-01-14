@@ -5,11 +5,11 @@ var inside = require('turf-inside');
 var explode = require('turf-explode');
 
 /**
- * Finds a {@link Point} guaranteed to be on the surface of a geometry,
- * feature, or featurecollection.
+ * Finds a {@link Point} guaranteed to be on the surface of
+ * {@link GeoJSON} object.
  *
  * @module turf/pointOnSurface
- * @param {*} input any GeoJSON object
+ * @param {GeoJSON} input any GeoJSON object
  * @returns {Feature} a point on the surface
  */
 module.exports = function(fc) {
@@ -94,7 +94,7 @@ module.exports = function(fc) {
       if(inside(cent, f)) {
         onSurface = true;
       }
-    } 
+    }
     i++;
   }
   if(onSurface) {
@@ -115,7 +115,7 @@ module.exports = function(fc) {
     }
     return closestVertex;
   }
-}
+};
 
 function pointOnSegment (x, y, x1, y1, x2, y2) {
   var ab = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
