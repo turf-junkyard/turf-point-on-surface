@@ -14,17 +14,18 @@ var explode = require('turf-explode');
  *
  * @module turf/pointOnSurface
  * @param {GeoJSON} input any GeoJSON object
- * @returns {Feature} a point on the surface
+ * @returns {Feature} a point on the surface of `input`
  * @example
  * // create a random polygon
  * var polygon = turf.random('polygon');
  *
- * // place a point on it
+ * //=polygon
+ *
  * var pointOnPolygon = turf.pointOnSurface(polygon);
  *
- * // show both of them
- * var fc = turf.featurecollection([polygon, pointOnPolygon]);
- * //=fc
+ * var fc = turf.featurecollection(polygon.features.concat(pointOnPolygon));
+ *
+ * //=pointOnPolygon
  */
 module.exports = function(fc) {
   // normalize
@@ -32,7 +33,8 @@ module.exports = function(fc) {
     if(fc.type != 'Feature') {
       fc = {
         type: 'Feature',
-        geometry: fc
+        geometry: fc,
+        properties: {}
       };
     }
     fc = featureCollection([fc]);
@@ -103,7 +105,8 @@ module.exports = function(fc) {
     } else if(geom.type === 'Polygon' || geom.type === 'MultiPolygon') {
       var f = {
         type: 'Feature',
-        geometry: geom
+        geometry: geom,
+        properties: {}
       };
       if(inside(cent, f)) {
         onSurface = true;
