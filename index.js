@@ -12,7 +12,7 @@ var explode = require('turf-explode');
  * * Given a {@link LineString}, the point will be along the string
  * * Given a {@link Point}, the point will the same as the input
  *
- * @module turf/pointOnSurface
+ * @module turf/point-on-surface
  * @category measurement
  * @param {GeoJSON} input any GeoJSON object
  * @returns {Feature} a point on the surface of `input`
@@ -24,9 +24,13 @@ var explode = require('turf-explode');
  *
  * var pointOnPolygon = turf.pointOnSurface(polygon);
  *
- * var fc = turf.featurecollection(polygon.features.concat(pointOnPolygon));
+* var resultFeatures = polygon.features.concat(pointOnPolygon);
+* var result = {
+*   "type": "FeatureCollection",
+*   "features": resultFeatures
+* };
  *
- * //=pointOnPolygon
+ * //=result
  */
 module.exports = function(fc) {
   // normalize
