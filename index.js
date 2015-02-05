@@ -13,6 +13,7 @@ var explode = require('turf-explode');
  * * Given a {@link Point}, the point will the same as the input
  *
  * @module turf/pointOnSurface
+ * @category measurement
  * @param {GeoJSON} input any GeoJSON object
  * @returns {Feature} a point on the surface of `input`
  * @example
