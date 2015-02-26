@@ -5,8 +5,7 @@ var inside = require('turf-inside');
 var explode = require('turf-explode');
 
 /**
- * Finds a {@link Point} guaranteed to be on the surface of
- * {@link GeoJSON} object.
+ * Takes a feature and returns a point guaranteed to be on the surface of the feature.
  *
  * * Given a {@link Polygon}, the point will be in the area of the polygon
  * * Given a {@link LineString}, the point will be along the string
@@ -14,8 +13,8 @@ var explode = require('turf-explode');
  *
  * @module turf/point-on-surface
  * @category measurement
- * @param {GeoJSON} input any GeoJSON object
- * @returns {Feature} a point on the surface of `input`
+ * @param {(Feature<(Point|LineString|Polygon)>|FeatureCollection<(Point|LineString|Polygon)>)} input any feature or set of features
+ * @returns {Feature<(Point|LineString|Polygon)>} a point on the surface of `input`
  * @example
  * // create a random polygon
  * var polygon = turf.random('polygon');
