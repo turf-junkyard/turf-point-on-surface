@@ -33,8 +33,8 @@ var explode = require('turf-explode');
  */
 module.exports = function(fc) {
   // normalize
-  if(fc.type != 'FeatureCollection') {
-    if(fc.type != 'Feature') {
+  if(fc.type !== 'FeatureCollection') {
+    if(fc.type !== 'Feature') {
       fc = {
         type: 'Feature',
         geometry: fc,
